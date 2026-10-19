@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電影配樂與情緒膠囊 | Cinematic Vibe & Sound Capsule</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-neutral-950 text-neutral-100 min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <!-- 動態背景 Canvas -->
+    <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+
+    <!-- 頂部導覽列 -->
+    <header class="relative z-10 border-b border-neutral-800/60 backdrop-blur-md bg-neutral-950/70 sticky top-0">
+        <div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span class="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></span>
+                <h1 class="font-orbitron tracking-wider text-sm md:text-base font-bold text-neutral-200">CINEMATIC CAPSULE</h1>
+            </div>
+            <div class="text-xs text-neutral-400 font-mono" id="currentTime">--:--:--</div>
+        </div>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="relative z-10 max-w-4xl mx-auto px-6 py-10 flex-grow w-full space-y-10">
+
+        <!-- 標題區 -->
+        <section class="text-center space-y-3">
+            <h2 class="text-3xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-neutral-100 via-neutral-300 to-neutral-500 bg-clip-text text-transparent">
+                捕捉你的當下心境
+            </h2>
+            <p class="text-neutral-400 text-sm md:text-base max-w-lg mx-auto">
+                選擇一種電影氛圍，沉浸在即時生成的管弦旋律與光影中，並封存你的今日情緒膠囊。
+            </p>
+        </section>
+
+        <!-- 情境選擇區 (Vibe Selector) - 5 種模式 -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- 模式 1 -->
+            <button onclick="setVibe('interstellar')" id="btn-interstellar" class="vibe-btn text-left p-6 rounded-2xl border border-neutral-800 bg-neutral-900/50 hover:bg-neutral-900 transition-all duration-300 group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="relative z-10 space-y-2">
+                    <span class="text-xs font-mono uppercase tracking-widest text-indigo-400">Mode 01</span>
+                    <h3 class="text-lg font-bold font-orbitron text-neutral-100">星際漫遊</h3>
+                    <p class="text-xs text-neutral-400 leading-relaxed">孤寂、浩瀚、沈穩的鋼琴琶音，適合深夜深度思考。</p>
+                </div>
+            </button>
+
+            <!-- 模式 2 -->
+            <button onclick="setVibe('dawn')" id="btn-dawn" class="vibe-btn text-left p-6 rounded-2xl border border-neutral-800 bg-neutral-900/50 hover:bg-neutral-900 transition-all duration-300 group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="relative z-10 space-y-2">
+                    <span class="text-xs font-mono uppercase tracking-widest text-amber-400">Mode 02</span>
+                    <h3 class="text-lg font-bold font-orbitron text-neutral-100">破曉曙光</h3>
+                    <p class="text-xs text-neutral-400 leading-relaxed">充滿希望、漸強、迎向未來的明亮感。</p>
+                </div>
+            </button>
+
+            <!-- 模式 3 -->
+            <button onclick="setVibe('midnight')" id="btn-midnight" class="vibe-btn text-left p-6 rounded-2xl border border-neutral-800 bg-neutral-900/50 hover:bg-neutral-900 transition-all duration-300 group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="relative z-10 space-y-2">
+                    <span class="text-xs font-mono uppercase tracking-widest text-emerald-400">Mode 03</span>
+                    <h3 class="text-lg font-bold font-orbitron text-neutral-100">深夜思緒</h3>
+                    <p class="text-xs text-neutral-400 leading-relaxed">低沉、安靜、適合靈感爆發與 Lo-Fi 沉澱。</p>
+                </div>
+            </button>
+
+            <!-- 模式 4 (新加入：很歡樂) -->
+            <button onclick="setVibe('festival')" id="btn-festival" class="vibe-btn text-left p-6 rounded-2xl border border-neutral-800 bg-neutral-900/50 hover:bg-neutral-900 transition-all duration-300 group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="relative z-10 space-y-2">
+                    <span class="text-xs font-mono uppercase tracking-widest text-rose-400">Mode 04</span>
+                    <h3 class="text-lg font-bold font-orbitron text-neutral-100">夏日慶典</h3>
+                    <p class="text-xs text-neutral-400 leading-relaxed">歡樂、輕快、跳躍的派對節奏，充滿活力與笑容。</p>
+                </div>
+            </button>
+
+            <!-- 模式 5 (新加入：激昂熱血) -->
+            <button onclick="setVibe('anthem')" id="btn-anthem" class="vibe-btn text-left p-6 rounded-2xl border border-neutral-800 bg-neutral-900/50 hover:bg-neutral-900 transition-all duration-300 group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="relative z-10 space-y-2">
+                    <span class="text-xs font-mono uppercase tracking-widest text-orange-400">Mode 05</span>
+                    <h3 class="text-lg font-bold font-orbitron text-neutral-100">英雄崛起</h3>
+                    <p class="text-xs text-neutral-400 leading-relaxed">激昂熱血、大氣磅礡的史詩管弦，挑戰極限時的最佳拍檔。</p>
+                </div>
+            </button>
+        </section>
+
+        <!-- 播放控制與視覺化面板 -->
+        <section class="border border-neutral-800 bg-neutral-900/30 backdrop-blur rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="space-y-1 text-center md:text-left">
+                <div class="text-xs text-neutral-500 font-mono uppercase">Current Vibe</div>
+                <div id="currentVibeTitle" class="text-xl font-bold font-orbitron text-neutral-200">請選擇上方情境</div>
+                <div id="currentVibeDesc" class="text-xs text-neutral-400">點擊任意模式以啟動合成配樂與光影</div>
+            </div>
+            <button onclick="toggleAudio()" id="audioToggleBtn" disabled class="px-6 py-3 rounded-xl bg-neutral-800 text-neutral-400 font-medium text-sm transition-all flex items-center space-x-2 cursor-not-allowed">
+                <svg id="playIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span id="audioBtnText">等待選擇情境</span>
+            </button>
+        </section>
+
+        <!-- 情緒膠囊日記產生器 -->
+        <section class="border border-neutral-800 bg-neutral-900/30 backdrop-blur rounded-2xl p-6 md:p-8 space-y-6">
+            <div class="space-y-2">
+                <h3 class="text-lg font-bold font-orbitron flex items-center space-x-2">
+                    <span>🎬 情緒膠囊海報</span>
+                </h3>
+                <p class="text-xs text-neutral-400">寫下一句你此時此刻的獨白或筆記，將它封存成一張電影海報卡片。</p>
+            </div>
+
+            <div class="space-y-4">
+                <textarea id="diaryInput" rows="3" placeholder="例如：今天完成了一個巨大的挑戰，心情超級亢奮！..." class="w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-sm text-neutral-200 placeholder-neutral-600 focus:outline-none focus:border-neutral-600 transition-colors resize-none"></textarea>
+                <button onclick="generatePoster()" class="w-full py-3 rounded-xl bg-neutral-100 text-neutral-950 font-bold text-sm hover:bg-neutral-200 transition-colors shadow-lg">
+                    生成電影海報卡片
+                </button>
+            </div>
+
+            <!-- 海報預覽卡片輸出區 -->
+            <div id="posterCard" class="hidden relative border border-neutral-700 bg-neutral-950 rounded-2xl p-8 space-y-6 overflow-hidden shadow-2xl">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="flex justify-between items-center border-b border-neutral-800 pb-4">
+                    <span class="font-orbitron text-xs tracking-widest text-amber-500 uppercase" id="posterVibeTag">VIBE</span>
+                    <span class="text-xs font-mono text-neutral-500" id="posterDate">2026.10.19</span>
+                </div>
+                <blockquote class="text-base md:text-lg font-medium text-neutral-200 italic leading-relaxed" id="posterText">
+                    "..."
+                </blockquote>
+                <div class="flex justify-between items-end pt-2">
+                    <div>
+                        <div class="text-xs text-neutral-500 font-mono">CINEMATIC SOUNDTRACK</div>
+                        <div class="text-xs font-bold text-neutral-400 font-orbitron">SOUND CAPSULE #01</div>
+                    </div>
+                    <button onclick="copyPosterText()" class="text-xs text-amber-400 hover:text-amber-300 font-mono underline">
+                        複製內文
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="relative z-10 border-t border-neutral-900 py-6 text-center text-xs text-neutral-600 font-mono">
+        Cinematic Vibe & Sound Capsule • Built with Vibe Coding
+    </footer>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        // 即時時鐘
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toTimeString().split(' ')[0];
+        }, 1000);
+
+        // 背景 Canvas 動畫
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let currentVibeType = 'interstellar';
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * (currentVibeType === 'anthem' ? 1.2 : 0.4);
+                this.speedY = (Math.random() - 0.5) * (currentVibeType === 'anthem' ? 1.2 : 0.4);
+                this.alpha = Math.random() * 0.6 + 0.1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.fillStyle = currentVibeType === 'interstellar' ? `rgba(99, 102, 241, ${this.alpha})` :
+                                currentVibeType === 'dawn' ? `rgba(245, 158, 11, ${this.alpha})` :
+                                currentVibeType === 'midnight' ? `rgba(16, 185, 129, ${this.alpha})` :
+                                currentVibeType === 'festival' ? `rgba(244, 63, 94, ${this.alpha})` :
+                                `rgba(249, 115, 22, ${this.alpha})`; // anthem
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 70; i++) particles.push(new Particle());
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        // Web Audio API 合成音效邏輯 (擴充 5 種情境)
+        let audioCtx = null;
+        let isPlaying = false;
+        let synthInterval = null;
+
+        const vibes = {
+            interstellar: {
+                title: "《星際漫遊》 (Interstellar Space)",
+                desc: "孤寂、浩瀚、沈穩的鋼琴琶音音階合成。",
+                tag: "INTERSTELLAR VIBE",
+                notes: [220.00, 261.63, 329.63, 392.00, 440.00, 523.25],
+                speed: 1200,
+                wave: 'sine'
+            },
+            dawn: {
+                title: "《破曉曙光》 (Dawn Awakening)",
+                desc: "充滿希望與明亮感的上升和弦結構。",
+                tag: "DAWN AWAKENING",
+                notes: [261.63, 329.63, 392.00, 523.25, 659.25, 783.99],
+                speed: 1000,
+                wave: 'sine'
+            },
+            midnight: {
+                title: "《深夜思緒》 (Midnight Reflection)",
+                desc: "低沉溫暖、適合 Lo-Fi 沉澱的慵懶旋律。",
+                tag: "MIDNIGHT REFLECTION",
+                notes: [174.61, 220.00, 261.63, 349.23, 392.00, 440.00],
+                speed: 1400,
+                wave: 'triangle'
+            },
+            festival: {
+                title: "《夏日慶典》 (Summer Festival)",
+                desc: "輕快、跳躍、充滿歡樂派對感的明亮旋律。",
+                tag: "SUMMER FESTIVAL",
+                notes: [329.63, 392.00, 440.00, 523.25, 587.33, 659.25],
+                speed: 400, // 節奏更快、更歡樂
+                wave: 'triangle'
+            },
+            anthem: {
+                title: "《英雄崛起》 (Epic Anthem)",
+                desc: "激昂熱血、大氣磅礡的史詩管弦和弦疊加。",
+                tag: "EPIC ANTHEM",
+                notes: [130.81, 196.00, 261.63, 329.63, 392.00, 523.25], // 低音與高亢主音交織
+                speed: 600,
+                wave: 'sawtooth' // 鋸齒波帶有管弦銅管的厚實感
+            }
+        };
+
+        function setVibe(type) {
+            currentVibeType = type;
+            const vibe = vibes[type];
+
+            // 更新介面文字
+            document.getElementById('currentVibeTitle').textContent = vibe.title;
+            document.getElementById('currentVibeDesc').textContent = vibe.desc;
+            
+            // 按鈕啟用狀態
+            const btn = document.getElementById('audioToggleBtn');
+            btn.disabled = false;
+            btn.classList.remove('bg-neutral-800', 'text-neutral-400', 'cursor-not-allowed');
+            btn.classList.add('bg-neutral-100', 'text-neutral-950', 'hover:bg-neutral-200');
+            document.getElementById('audioBtnText').textContent = isPlaying ? "暫停配樂" : "開始播放合成配樂";
+
+            // 高亮選擇按鈕
+            document.querySelectorAll('.vibe-btn').forEach(b => b.classList.remove('border-neutral-400', 'bg-neutral-900'));
+            document.getElementById(`btn-${type}`).classList.add('border-neutral-400', 'bg-neutral-900');
+
+            // 重新調整粒子速度
+            particles.forEach(p => p.reset());
+
+            if (isPlaying) {
+                stopSynth();
+                startSynth();
+            }
+        }
+
+        function toggleAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            if (isPlaying) {
+                stopSynth();
+                isPlaying = false;
+                document.getElementById('audioBtnText').textContent = "開始播放合成配樂";
+            } else {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                startSynth();
+                isPlaying = true;
+                document.getElementById('audioBtnText').textContent = "暫停配樂";
+            }
+        }
+
+        function playTone() {
+            if (!audioCtx || !isPlaying) return;
+            const vibe = vibes[currentVibeType];
+            const notes = vibe.notes;
+            const freq = notes[Math.floor(Math.random() * notes.length)];
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = vibe.wave;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+            const vol = currentVibeType === 'anthem' ? 0.08 : 0.12; // 銅管音色稍微調小避免過噪
+
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.2);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (currentVibeType === 'festival' ? 0.5 : 2.5));
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + (currentVibeType === 'festival' ? 0.5 : 2.5));
+        }
+
+        function startSynth() {
+            playTone();
+            const speed = vibes[currentVibeType].speed;
+            synthInterval = setInterval(playTone, speed);
+        }
+
+        function stopSynth() {
+            if (synthInterval) {
+                clearInterval(synthInterval);
+                synthInterval = null;
+            }
+        }
+
+        // 生成海報卡片
+        function generatePoster() {
+            const text = document.getElementById('diaryInput').value.trim();
+            if (!text) {
+                alert('請先輸入一些今天的心情獨白或筆記喔！');
+                return;
+            }
+
+            const vibe = vibes[currentVibeType];
+            document.getElementById('posterText').textContent = `"${text}"`;
+            document.getElementById('posterVibeTag').textContent = vibe.tag;
+            
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')}`;
+            document.getElementById('posterDate').
